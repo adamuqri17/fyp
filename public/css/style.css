@@ -1,0 +1,355 @@
+/* --- Global Layout & Sticky Footer --- */
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main {
+    flex: 1;
+}
+
+/* --- Navigation --- */
+.navbar {
+    background-color: #006241; /* Green theme */
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #fff !important;
+}
+
+/* --- Hero Section --- */
+.hero {
+    padding: 60px 0;
+}
+
+.hero h1 {
+    font-size: 2.8rem;
+    font-weight: bold;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    color: #555;
+}
+
+/* --- Cards --- */
+.search-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.plot-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.plot-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.advisor-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+/* --- Modern Footer Styling --- */
+.footer-modern {
+    background: linear-gradient(180deg, #1a1e21 0%, #0f1112 100%);
+    color: #b0b3b8;
+    font-size: 0.9rem;
+}
+
+.footer-title {
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.footer-link {
+    color: #b0b3b8;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.footer-link:hover {
+    color: #2ecc71;
+    transform: translateX(5px);
+}
+
+.footer-divider {
+    border-color: rgba(255,255,255,0.1);
+}
+
+.staff-login-btn {
+    color: #6c757d;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.staff-login-btn:hover {
+    color: #fff;
+    border-color: #fff;
+    background: rgba(255,255,255,0.05);
+}
+
+/* --- Login Page Styling --- */
+.login-body {
+    overflow: hidden !important; /* Prevents scrollbars on the split screen */
+    background-color: #f0f2f5;
+    display: block; /* Overrides the flex display from main body */
+}
+
+.login-container {
+    display: flex;
+    height: 100vh;
+}
+
+.login-image {
+    flex: 1.2;
+    background-image: linear-gradient(rgba(0, 50, 30, 0.7), rgba(0, 50, 30, 0.8)), url('/images/kubur.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.login-image h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin-bottom: 1rem;
+}
+
+.login-image p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+}
+
+.login-form-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    position: relative;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 450px;
+    padding: 3rem;
+}
+
+.brand-logo {
+    width: 80px;
+    height: 80px;
+    background-color: #006241;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 2rem auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.login-form-control {
+    padding: 0.8rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e1e4e8;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.login-form-control:focus {
+    background-color: white;
+    border-color: #006241;
+    box-shadow: 0 0 0 0.2rem rgba(0, 98, 65, 0.15);
+    outline: none;
+}
+
+.btn-login {
+    background-color: #006241;
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 0.5rem;
+    transition: transform 0.2s;
+    width: 100%;
+}
+
+.btn-login:hover {
+    background-color: #004d33;
+    transform: translateY(-2px);
+    color: white;
+}
+
+.login-input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.login-input-icon {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-right: none;
+    color: #6c757d;
+    padding: 0.8rem 1rem;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.login-input-field {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    border-left: none;
+}
+
+/* Mobile Responsive for Login */
+@media (max-width: 992px) {
+    .login-image {
+        display: none;
+    }
+    .login-form-wrapper {
+        background: linear-gradient(rgba(0, 50, 30, 0.8), rgba(0, 50, 30, 0.9)), url('/images/kubur.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin: 1rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+}
+
+/* --- Contact Page Styling --- */
+.contact-hero {
+    background: linear-gradient(rgba(0, 98, 65, 0.9), rgba(0, 98, 65, 0.8)), url('/images/kubur.jpg') center/cover;
+    color: white;
+    padding: 80px 0;
+    margin-bottom: 3rem;
+}
+
+.contact-icon-box {
+    width: 45px;
+    height: 45px;
+    background-color: #e8f5e9; /* Very light green */
+    color: #006241;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.form-control-soft {
+    background-color: #f8f9fa;
+    border: 1px solid transparent;
+    padding: 0.8rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.form-control-soft:focus {
+    background-color: #fff;
+    border-color: #006241;
+    box-shadow: 0 0 0 0.2rem rgba(0, 98, 65, 0.1);
+}
+
+.hover-elevate:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* --- Map Page Styling --- */
+.map-wrapper {
+    position: relative;
+    padding: 0 15px; /* Gutter for mobile */
+}
+
+.map-container {
+    height: 75vh; /* Takes up 75% of the viewport height */
+    width: 100%;
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+#viewDiv {
+    height: 100%;
+    width: 100%;
+    background-color: #f0f0f0; /* Fallback color */
+}
+
+.map-legend {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 50; /* Ensure it floats above the map */
+    min-width: 160px;
+    backdrop-filter: blur(5px);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #444;
+    font-weight: 500;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
