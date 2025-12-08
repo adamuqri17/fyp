@@ -353,3 +353,108 @@ main {
     margin-right: 10px;
     border: 1px solid rgba(0,0,0,0.1);
 }
+
+.home-hero {
+    position: relative;
+    background: linear-gradient(rgba(0, 50, 30, 0.85), rgba(0, 98, 65, 0.75)), url('/images/kubur.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Parallax effect */
+    padding: 120px 0 160px 0; /* Extra bottom padding for the floating search */
+    color: white;
+    text-align: center;
+    margin-bottom: 5rem;
+}
+
+.home-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    margin-bottom: 1.5rem;
+}
+
+.home-hero .lead {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 300;
+}
+
+/* 2. Floating Search Container */
+.search-container-floating {
+    margin-top: -100px; /* Pulls it up into the Hero */
+    background: white;
+    padding: 2rem 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 15px 35px rgba(0, 98, 65, 0.15);
+    position: relative;
+    z-index: 10;
+}
+
+.search-title {
+    color: #006241;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+/* 3. Feature Cards */
+.feature-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border-color: #006241;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #e8f5e9;
+    color: #006241;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    background-color: #006241;
+    color: white;
+}
+
+/* 4. Stats Section */
+.stats-section {
+    background-color: #006241;
+    color: white;
+    padding: 4rem 0;
+    margin-top: 4rem;
+}
+
+.stat-item h2 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item p {
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}

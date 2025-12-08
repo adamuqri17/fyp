@@ -16,5 +16,12 @@ class AdminSeeder extends Seeder
             'name' => 'System Admin',
             'phone' => '0123456789',
         ]);
+
+        Administrator::create([
+            'username' => 'adam',  // <--- Your preferred username
+            'password' => Hash::make('adam123'), // <--- Your preferred password
+            'name' => 'Adam Muqri',
+            'phone' => '011-11111111',
+        ]);
     }
 }
