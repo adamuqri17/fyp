@@ -2,42 +2,35 @@
 
 @section('content')
 <div class="container py-5">
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-8">
-            <h2 class="fw-bold text-success">Hasil Carian</h2>
-            <p class="text-muted">
-                Carian untuk: <span class="text-dark fw-bold">"{{ $keyword ?? '...' }}"</span>
-            </p>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ route('home') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Kembali ke Utama
-            </a>
-        </div>
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-success">Direktori Arwah</h2>
+        <p class="text-muted">Senarai penuh rekod kematian dan lokasi pusara.</p>
     </div>
 
-    <div class="card shadow-sm border-0 rounded-3">
+    <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4">Nama Arwah</th>
-                            <th>No. Kad Pengenalan</th>
+                            <th class="ps-4">Nama Penuh</th>
                             <th>Tarikh Meninggal</th>
-                            <th>Lokasi Kubur</th>
+                            <th>Lokasi Pusara</th>
                             <th class="text-end pe-4">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($results as $person)
+                        @forelse($deceaseds as $person)
                         <tr>
                             <td class="ps-4">
                                 <div class="fw-bold text-dark">{{ $person->full_name }}</div>
-                                <small class="text-muted">Umur: {{ \Carbon\Carbon::parse($person->date_of_birth)->diffInYears($person->date_of_death) }} Tahun</small>
+                                <small class="text-muted">
+                                    <i class="fas fa-id-card me-1"></i> {{ $person->ic_number }}
+                                </small>
                             </td>
-                            <td>{{ $person->ic_number }}</td>
-                            <td>{{ \Carbon\Carbon::parse($person->date_of_death)->format('d M Y') }}</td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($person->date_of_death)->format('d M Y') }}
+                            </td>
                             <td>
                                 @if($person->grave)
                                     <span class="badge bg-success">
@@ -49,8 +42,8 @@
                             </td>
                             <td class="text-end pe-4">
                                 @if($person->grave)
-                                    <a href="{{ route('map.public') }}?focus={{ $person->grave->grave_id }}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-map-marked-alt me-1"></i> Lihat Peta
+                                    <a href="{{ route('map.public') }}?focus={{ $person->grave->grave_id }}" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-map-marked-alt me-1"></i> Lokasi
                                     </a>
                                 @else
                                     <button class="btn btn-sm btn-light" disabled>Tiada Lokasi</button>
@@ -59,18 +52,18 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-search fa-2x mb-3"></i><br>
-                                    Tiada rekod dijumpai untuk carian "{{ $keyword }}".<br>
-                                    <small>Sila pastikan ejaan nama atau nombor kad pengenalan adalah betul.</small>
-                                </div>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                Tiada rekod dijumpai.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+        </div>
+        
+        <div class="card-footer bg-white d-flex justify-content-center py-3">
+            {{ $deceaseds->links() }}
         </div>
     </div>
 </div>

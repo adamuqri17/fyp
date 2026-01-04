@@ -1,52 +1,67 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Grave;
+use App\Http\Controllers\PublicController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminGraveController;
+use App\Http\Controllers\AdminDeceasedController;
 
-// --- Public Routes (Closures for now) ---
-Route::get('/', function () {
-    return view('homepage');
-});
 
-Route::get('map', function () {
-    return view('map');
-});
+// =========================================================================
+// 1. PUBLIC ROUTES (Accessible by everyone)
+// =========================================================================
 
-Route::get('/contact', function () {
-    return view('public.contact');
-})->name('contact');
+// Homepage & Static Pages
+Route::get('/', [PublicController::class, 'home'])->name('home');
+Route::get('/contact', function () { return view('public.contact'); })->name('contact');
 
-Route::get('/search', function () {
-    return view('public.results');
-})->name('grave.search');
+// Public Map (Fetches Data Directly)
+Route::get('/map', function () {
+    $graves = Grave::with(['section', 'deceased'])->get();
+    return view('map', compact('graves'));
+})->name('map.public');
 
-// --- Admin Guest Routes (Login) ---
+// Search Functionality
+Route::get('/search', [PublicController::class, 'search'])->name('grave.search');
+Route::get('/directory', [PublicController::class, 'directory'])->name('public.directory');
+
+
+// =========================================================================
+// 2. ADMIN AUTHENTICATION (Guest Only)
+// =========================================================================
+
 Route::middleware('guest:admin')->group(function () {
     Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 });
 
-// --- Protected Admin Routes ---
+
+// =========================================================================
+// 3. ADMIN DASHBOARD & MANAGEMENT (Login Required)
+// =========================================================================
+
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
-    
+
+    // --- Dashboard & Auth ---
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-
-    // Dashboard (Closure for testing UI)
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminGraveController::class, 'dashboard'])->name('admin.dashboard');
+    // --- Module A: Grave Management ---
+    Route::get('/map-manager', [AdminGraveController::class, 'mapManager'])->name('admin.map.manager');
     
-    // --- NEW: REAL CRUD ROUTES ---
-    // This one line creates all routes (index, create, store, edit, update, destroy)
-    Route::resource('/graves', \App\Http\Controllers\AdminGraveController::class, [
-        'as' => 'admin' // Prefixes routes names with 'admin.' (e.g., admin.graves.index)
-    ]);
-    
-    // Keep this for now until we build the Deceased Controller
-    Route::get('/deceased/create', function () { 
-        return view('admin.deceased.create'); 
-    });
+    Route::get('/graves', [AdminGraveController::class, 'index'])->name('admin.graves.index');
+    Route::get('/graves/create', [AdminGraveController::class, 'create'])->name('admin.graves.create');
+    Route::post('/graves', [AdminGraveController::class, 'store'])->name('admin.graves.store');
+    Route::get('/graves/{id}/edit', [AdminGraveController::class, 'edit'])->name('admin.graves.edit');
+    Route::put('/graves/{id}', [AdminGraveController::class, 'update'])->name('admin.graves.update');
+    Route::delete('/graves/{id}', [AdminGraveController::class, 'destroy'])->name('admin.graves.destroy');
 
-    // Visual Map Manager
-    Route::get('/map-manager', [App\Http\Controllers\AdminGraveController::class, 'mapManager'])->name('admin.map.manager');
+    // --- Module B: Deceased Management ---
+    Route::get('/deceased', [AdminDeceasedController::class, 'index'])->name('admin.deceased.index');
+    Route::get('/deceased/create', [AdminDeceasedController::class, 'create'])->name('admin.deceased.create');
+    Route::post('/deceased', [AdminDeceasedController::class, 'store'])->name('admin.deceased.store');
+    Route::get('/deceased/{id}/edit', [AdminDeceasedController::class, 'edit'])->name('admin.deceased.edit');
+    Route::put('/deceased/{id}', [AdminDeceasedController::class, 'update'])->name('admin.deceased.update');
+    Route::delete('/deceased/{id}', [AdminDeceasedController::class, 'destroy'])->name('admin.deceased.destroy');
+
 });

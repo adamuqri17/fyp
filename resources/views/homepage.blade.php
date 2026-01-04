@@ -78,7 +78,7 @@
                 <p class="text-muted mb-4">
                     Pangkalan data lengkap yang menyimpan rekod kematian dan lokasi pengebumian secara sistematik dan selamat.
                 </p>
-                <a href="#" class="text-success fw-bold text-decoration-none stretched-link">
+                <a href="{{ route('public.directory') }}" class="text-success fw-bold text-decoration-none stretched-link">
                     Semak Rekod <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
@@ -105,16 +105,18 @@
     <div class="container">
         <div class="row text-center g-4">
             <div class="col-md-4 stat-item">
-                <h2>1,250</h2>
-                <p>Jumlah Jenazah Dikebumikan</p>
+                <h2 class="fw-bold text-success">{{ $totalDeceased }}</h2>
+                <p class="text-muted">Jumlah Jenazah Dikebumikan</p>
             </div>
+            
             <div class="col-md-4 stat-item">
-                <h2>85</h2>
-                <p>Plot Kosong (Tahun Ini)</p>
+                <h2 class="fw-bold text-success">{{ $totalAvailable }}</h2>
+                <p class="text-muted">Plot Kosong (Semasa)</p>
             </div>
+            
             <div class="col-md-4 stat-item">
-                <h2>4</h2>
-                <p>Zon / Blok Utama</p>
+                <h2 class="fw-bold text-success">{{ $totalZones }}</h2>
+                <p class="text-muted">Zon / Blok Utama</p>
             </div>
         </div>
     </div>

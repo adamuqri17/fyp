@@ -9,6 +9,24 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminGraveController extends Controller
 {
+    // 0. DASHBOARD (New Method)
+    public function dashboard()
+    {
+        // 1. Get Stats
+        $totalGraves = Grave::count();
+        $available   = Grave::where('status', 'available')->count();
+        $occupied    = Grave::where('status', 'occupied')->count();
+        $reserved    = Grave::where('status', 'reserved')->count();
+
+        // 2. Get 5 Most Recent Deceased Records
+        $recentDeceased = \App\Models\Deceased::with('grave.section')
+                            ->latest()
+                            ->take(5)
+                            ->get();
+
+        return view('admin.dashboard', compact('totalGraves', 'available', 'occupied', 'reserved', 'recentDeceased'));
+    }
+    
     // 1. LIST ALL GRAVES
     public function index()
     {
@@ -87,8 +105,7 @@ class AdminGraveController extends Controller
     // 7. VISUAL MAP MANAGER
     public function mapManager()
     {
-        // Fetch all graves with deceased info
-        $graves = Grave::with('deceased')->get();
-        return view('admin.graves.map-manager', compact('graves'));
+        $graves = Grave::with(['deceased', 'section'])->get();
+        return view('map', compact('graves')); 
     }
 }

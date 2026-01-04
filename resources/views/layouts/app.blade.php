@@ -20,15 +20,32 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a></li>
+                
+                @auth('admin')
+                    <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Home</a></li>
+                @else
+                    <li class="nav-item"><a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a></li>
+                @endauth
+
                 <li class="nav-item"><a class="nav-link {{ Request::is('map') ? 'active' : '' }}" href="/map">Map Visualization</a></li>
                 <li class="nav-item"><a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Contact</a></li>
                 
                 @auth('admin')
+                    {{-- <li class="nav-item border-start ms-2 ps-2 d-none d-lg-block"></li> <li class="nav-item">
+                        <a class="nav-link {{ Request::routeIs('admin.map.manager') ? 'active' : '' }}" href="{{ route('admin.map.manager') }}">Map Manager</a>
+                    </li> --}}
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::routeIs('admin.deceased.index') ? 'active' : '' }}" href="{{ route('admin.deceased.index') }}">Deceased List</a>
+                    </li>
+
                     <li class="nav-item ms-lg-2">
-                        <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-light text-success fw-bold">
-                            <i class="fas fa-user-shield"></i> Admin Panel
-                        </a>
+                        <form action="{{ route('admin.logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-danger mt-1">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </form>
                     </li>
                 @endauth
             </ul>
