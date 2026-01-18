@@ -21,33 +21,54 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 
+                {{-- =========================================================
+                     1. ADMIN NAVBAR (Strictly the 4 items you requested)
+                     ========================================================= --}}
                 @auth('admin')
-                    <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Home</a></li>
-                @else
-                    <li class="nav-item"><a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a></li>
-                @endauth
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">Home</a>
+                    </li>
 
-                <li class="nav-item"><a class="nav-link {{ Request::is('map') ? 'active' : '' }}" href="/map">Map Visualization</a></li>
-                <li class="nav-item"><a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Contact</a></li>
-                
-                @auth('admin')
-                    {{-- <li class="nav-item border-start ms-2 ps-2 d-none d-lg-block"></li> <li class="nav-item">
-                        <a class="nav-link {{ Request::routeIs('admin.map.manager') ? 'active' : '' }}" href="{{ route('admin.map.manager') }}">Map Manager</a>
-                    </li> --}}
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::routeIs('admin.map.manager') ? 'active' : '' }}" href="{{ route('admin.map.manager') }}">Map</a>
+                    </li>
                     
                     <li class="nav-item">
                         <a class="nav-link {{ Request::routeIs('admin.deceased.index') ? 'active' : '' }}" href="{{ route('admin.deceased.index') }}">Deceased List</a>
                     </li>
 
-                    <li class="nav-item ms-lg-2">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ Request::is('admin/ledgers*') || Request::is('admin/orders*') ? 'active' : '' }}" href="#" id="ledgerDropdown" role="button" data-bs-toggle="dropdown">
+                            Ledger Management
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="ledgerDropdown">
+                            <li><a class="dropdown-item" href="{{ route('admin.ledgers.index') }}">Products (Batu Nisan)</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.orders.index') }}">Customer Orders</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item border-start ms-2 ps-2"></li>
+
+                    <li class="nav-item">
                         <form action="{{ route('admin.logout') }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-danger mt-1">
+                            <button type="submit" class="btn btn-sm btn-danger mt-1 ms-1">
                                 <i class="fas fa-sign-out-alt"></i>
                             </button>
                         </form>
                     </li>
+
+                {{-- =========================================================
+                     2. PUBLIC NAVBAR (Guest Only)
+                     ========================================================= --}}
+                @else
+                    <li class="nav-item"><a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link {{ Request::is('map') ? 'active' : '' }}" href="/map">Map Visualization</a></li>
+                    <li class="nav-item"><a class="nav-link {{ Request::routeIs('public.services.index') ? 'active' : '' }}" href="{{ route('public.services.index') }}">Tempahan Batu Nisan</a></li>
+                    <li class="nav-item"><a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Contact</a></li>
                 @endauth
+
             </ul>
         </div>
     </div>
@@ -60,51 +81,36 @@
 <footer class="footer-modern mt-auto pt-5 pb-3">
     <div class="container">
         <div class="row gy-4">
-            
             <div class="col-lg-5 col-md-6">
                 <h5 class="text-white fw-bold mb-3"><i class="fas fa-moon me-2 text-success"></i> TPIRS</h5>
                 <p class="mb-4">
                     Sistem Pengurusan Tanah Perkuburan Islam Raudhatul Sa’adah. 
-                    Dedicated to managing burial plots efficiently with modern geospatial technology 
-                    while upholding Islamic values.
+                    Dedicated to managing burial plots efficiently with modern geospatial technology.
                 </p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-whatsapp fa-lg"></i></a>
-                </div>
             </div>
-
             <div class="col-lg-3 col-md-6">
                 <h6 class="footer-title">Quick Navigation</h6>
                 <ul class="list-unstyled">
                     <li><a href="/" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Plot Search</a></li>
                     <li><a href="/map" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Digital Map</a></li>
-                    <li><a href="/contact" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Contact Office</a></li>
+                    <li><a href="{{ route('public.services.index') }}" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Batu Nisan Services</a></li>
                 </ul>
             </div>
-
             <div class="col-lg-4 col-md-6">
                 <h6 class="footer-title">Contact Us</h6>
                 <ul class="list-unstyled">
                     <li class="mb-3 d-flex">
                         <i class="fas fa-map-marker-alt text-success mt-1 me-3"></i>
-                        <span>Kampung Johan Setia,<br>41200 Klang, Selangor</span>
+                        <span>Kampung Johan Setia, 41200 Klang, Selangor</span>
                     </li>
                     <li class="mb-3 d-flex">
                         <i class="fas fa-phone text-success mt-1 me-3"></i>
                         <span>+60 3-3323 1234</span>
                     </li>
-                    <li class="mb-3 d-flex">
-                        <i class="fas fa-envelope text-success mt-1 me-3"></i>
-                        <span>admin@tpirs.gov.my</span>
-                    </li>
                 </ul>
             </div>
         </div>
-
         <hr class="footer-divider my-4">
-
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
                 <p class="mb-0 small">&copy; 2025 TPIRS. All rights reserved.</p>

@@ -6,10 +6,13 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminGraveController;
 use App\Http\Controllers\AdminDeceasedController;
+use App\Http\Controllers\AdminLedgerController; // <--- NEW
+use App\Http\Controllers\AdminOrderController;  // <--- NEW
+use App\Http\Controllers\PublicLedgerController;// <--- NEW
 
 
 // =========================================================================
-// 1. PUBLIC ROUTES (Accessible by everyone)
+// 1. PUBLIC ROUTES 
 // =========================================================================
 
 // Homepage & Static Pages
@@ -22,9 +25,15 @@ Route::get('/map', function () {
     return view('map', compact('graves'));
 })->name('map.public');
 
-// Search Functionality
+// Search & Directory
 Route::get('/search', [PublicController::class, 'search'])->name('grave.search');
 Route::get('/directory', [PublicController::class, 'directory'])->name('public.directory');
+
+// --- NEW MODULE: Grave Ledger Services (Batu Nisan) ---
+Route::get('/services', [PublicLedgerController::class, 'index'])->name('public.services.index');
+Route::get('/services/order/{id}', [PublicLedgerController::class, 'create'])->name('public.ledgers.order');
+Route::post('/services/order', [PublicLedgerController::class, 'store'])->name('public.ledgers.store');
+Route::get('/services/success', function() { return view('public.services.success'); })->name('public.services.success');
 
 
 // =========================================================================
@@ -46,6 +55,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     // --- Dashboard & Auth ---
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     Route::get('/dashboard', [AdminGraveController::class, 'dashboard'])->name('admin.dashboard');
+
     // --- Module A: Grave Management ---
     Route::get('/map-manager', [AdminGraveController::class, 'mapManager'])->name('admin.map.manager');
     
@@ -63,5 +73,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/deceased/{id}/edit', [AdminDeceasedController::class, 'edit'])->name('admin.deceased.edit');
     Route::put('/deceased/{id}', [AdminDeceasedController::class, 'update'])->name('admin.deceased.update');
     Route::delete('/deceased/{id}', [AdminDeceasedController::class, 'destroy'])->name('admin.deceased.destroy');
+
+    // --- Module C: Ledger & Order Management (NEW) ---
+    // Products (Batu Nisan Types)
+    Route::get('/ledgers', [AdminLedgerController::class, 'index'])->name('admin.ledgers.index');
+    Route::get('/ledgers/create', [AdminLedgerController::class, 'create'])->name('admin.ledgers.create');
+    Route::post('/ledgers', [AdminLedgerController::class, 'store'])->name('admin.ledgers.store');
+    Route::delete('/ledgers/{id}', [AdminLedgerController::class, 'destroy'])->name('admin.ledgers.destroy');
+
+    // Customer Orders
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+    Route::post('/orders/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.update');
 
 });

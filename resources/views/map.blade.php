@@ -9,6 +9,12 @@
                 <p class="text-muted mb-0 small">Geospatial Plotting System &bull; Kampung Johan Setia</p>
             </div>
             <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                @auth('admin')
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-dark btn-sm me-2">
+                        <i class="fas fa-columns me-1"></i> Dashboard
+                    </a>
+                @endauth
+                
                 <button class="btn btn-outline-secondary btn-sm me-2" onclick="location.reload()">
                     <i class="fas fa-sync me-1"></i> Refresh
                 </button>
@@ -24,7 +30,7 @@
     <div class="card border-0 shadow-lg overflow-hidden">
         <div class="card-body p-0 position-relative">
             
-            <div id="map" style="height: 500px; width: 100%; z-index: 1;"></div>
+            <div id="map" style="height: 600px; width: 100%; z-index: 1;"></div>
             
             <div class="position-absolute bg-white p-3 rounded shadow-sm" style="bottom: 20px; right: 20px; z-index: 1000; min-width: 160px; border-left: 5px solid #198754;">
                 <h6 class="fw-bold mb-3 small text-uppercase text-secondary" style="letter-spacing: 1px;">Legend</h6>
@@ -58,11 +64,9 @@
     // =========================================================
     // 1. PREPARE DATABASE DATA (The "Brain")
     // =========================================================
-    // We create a "Lookup Dictionary" so the map can quickly find status by ID
-    
-    const dbGraves = @json($graves); // Data passed from Laravel Controller
-    const graveStatus = {};    // Stores: { 5: 'occupied', 6: 'available' }
-    const graveInfo = {};      // Stores: { 5: 'Ahmad Albab', 6: 'Book Now' }
+    const dbGraves = @json($graves); 
+    const graveStatus = {};    
+    const graveInfo = {};      
 
     dbGraves.forEach(g => {
         graveStatus[g.grave_id] = g.status;
@@ -91,7 +95,6 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Variable to store layout for the "Focus" button
     var layoutLayer;
 
     // =========================================================
@@ -104,7 +107,6 @@
                 style: { color: 'blue', weight: 2, fillOpacity: 0.05 }
             }).addTo(map);
             
-            // Optional: Zoom to layout only if not searching
             if (!window.location.search.includes('focus')) {
                 map.fitBounds(layoutLayer.getBounds());
             }
@@ -114,30 +116,31 @@
     // =========================================================
     // 4. LOAD & COLOR REAL GRAVES (The "Hybrid" Logic)
     // =========================================================
-    const graveLayers = {}; // To store references for search zooming
+    const graveLayers = {}; 
 
-    fetch('/maps/graves_real.geojson')
+    fetch('/maps/map2.geojson')
         .then(response => response.json())
         .then(data => {
             data.features.forEach(feature => {
-                // A. GET DATA FROM QGIS FILE
-                // IMPORTANT: Your QGIS points must have an 'id' property!
-                // If they don't, we can't link them to the database.
-                var qgisID = feature.properties.fid; 
+                
+                // --- A. GET DATA FROM QGIS FILE ---
+                // We check for 'id' OR 'fid' to prevent errors if QGIS named it differently
+                var qgisID = feature.properties.id || feature.properties.fid; 
+                
                 var lat = feature.geometry.coordinates[1];
                 var lng = feature.geometry.coordinates[0];
 
-                // B. LOOK UP STATUS IN DATABASE
-                // If ID exists in DB, use that status. If not, default to 'available'.
+                // --- B. LOOK UP STATUS IN DATABASE ---
                 var status = graveStatus[qgisID] || 'available'; 
                 var popupInfo = graveInfo[qgisID] || '<b>Available</b>';
 
-                // C. DETERMINE COLOR
+                // --- C. DETERMINE COLOR ---
                 var color = '#28a745'; // Green
                 if (status === 'occupied') color = '#dc3545'; // Red
                 else if (status === 'reserved') color = '#ffc107'; // Yellow
 
-                // D. DRAW THE SHAPE
+                // --- D. DRAW THE SHAPE (Point -> Rectangle) ---
+                // 1.2m Width, 2.4m Height, 25 degree rotation
                 var corners = getRotatedRect(lat, lng, 1.2, 2.4, 25);
 
                 var polygon = L.polygon(corners, {
@@ -152,23 +155,28 @@
                     </div>
                 `).addTo(map);
 
-                // E. SAVE REFERENCE (For Search Function)
+                // --- E. SAVE REFERENCE ---
                 if (qgisID) {
                     graveLayers[qgisID] = polygon;
+                    
+                    // Add permanent label (White Text)
+                    polygon.bindTooltip(String(qgisID), {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'grave-label'
+                    });
                 }
             });
 
-            // F. CHECK FOR SEARCH "FOCUS"
-            // If user came from Search page (?focus=5), zoom to that grave
+            // --- F. CHECK FOR SEARCH "FOCUS" ---
             const urlParams = new URLSearchParams(window.location.search);
             const focusId = urlParams.get('focus');
 
             if (focusId && graveLayers[focusId]) {
                 const target = graveLayers[focusId];
-                map.setView(target.getBounds().getCenter(), 22); // Zoom in close
+                map.setView(target.getBounds().getCenter(), 22); 
                 target.openPopup();
                 
-                // Flash effect
                 target.setStyle({ color: 'blue', weight: 3 });
                 setTimeout(() => { target.setStyle({ color: '#555', weight: 1 }); }, 3000);
             }
@@ -179,6 +187,7 @@
     // 5. HELPER FUNCTIONS
     // =========================================================
     
+    // This math converts a single dot (lat/lng) into a rotated rectangle box
     function getRotatedRect(lat, lng, widthM, heightM, angle) {
         const metersPerLat = 111320; 
         const metersPerLng = 40075000 * Math.cos(lat * Math.PI / 180) / 360;
@@ -197,4 +206,18 @@
         if(layoutLayer) map.fitBounds(layoutLayer.getBounds());
     }
 </script>
+
+<style>
+    /* Style for the White Numbers */
+    .grave-label {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: white !important;
+        font-weight: 900;
+        font-size: 10px;
+        text-align: center;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+</style>
 @endsection

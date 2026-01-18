@@ -26,4 +26,8 @@ class Grave extends Model
     {
         return $this->hasOne(Deceased::class, 'grave_id');
     }
+
+    public function ledgerOrder() {
+        return $this->hasOne(LedgerOrder::class, 'grave_id');
+    }
 }
