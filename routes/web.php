@@ -6,83 +6,96 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminGraveController;
 use App\Http\Controllers\AdminDeceasedController;
-use App\Http\Controllers\AdminLedgerController; // <--- NEW
-use App\Http\Controllers\AdminOrderController;  // <--- NEW
-use App\Http\Controllers\PublicLedgerController;// <--- NEW
+use App\Http\Controllers\AdminLedgerController;
+use App\Http\Controllers\AdminOrderController;
+use App\Http\Controllers\PublicLedgerController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
 
-// =========================================================================
-// 1. PUBLIC ROUTES 
-// =========================================================================
+// =========================================================
+// 1. PUBLIC ROUTES
+// =========================================================
 
 // Homepage & Static Pages
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/contact', function () { return view('public.contact'); })->name('contact');
 
-// Public Map (Fetches Data Directly)
+// Public Interactive Map
 Route::get('/map', function () {
+    // Eager load relationships for performance
     $graves = Grave::with(['section', 'deceased'])->get();
     return view('map', compact('graves'));
 })->name('map.public');
 
-// Search & Directory
+// Directory & Search
 Route::get('/search', [PublicController::class, 'search'])->name('grave.search');
 Route::get('/directory', [PublicController::class, 'directory'])->name('public.directory');
 
-// --- NEW MODULE: Grave Ledger Services (Batu Nisan) ---
+// --- HEADSTONE / LEDGER ORDERING SERVICES ---
 Route::get('/services', [PublicLedgerController::class, 'index'])->name('public.services.index');
+
+// Order Flow
 Route::get('/services/order/{id}', [PublicLedgerController::class, 'create'])->name('public.ledgers.order');
-Route::post('/services/order', [PublicLedgerController::class, 'store'])->name('public.ledgers.store');
-Route::get('/services/success', function() { return view('public.services.success'); })->name('public.services.success');
+Route::post('/services/order', [PublicLedgerController::class, 'store'])->name('public.ledgers.store'); // Redirects to ToyyibPay
+
+// AJAX: Smart Search for Deceased/Plots (Used in Order Form)
+Route::get('/services/search-deceased', [PublicLedgerController::class, 'searchDeceased'])->name('public.services.search');
+
+// --- TOYYIBPAY PAYMENT ROUTES ---
+Route::get('/services/payment/return', [PublicLedgerController::class, 'paymentReturn'])->name('public.ledgers.return');
+Route::post('/services/payment/callback', [PublicLedgerController::class, 'paymentCallback'])->name('public.ledgers.callback');
+
+// Success Confirmation Page
+Route::get('/services/success', function() { 
+    return view('public.services.success'); 
+})->name('public.services.success');
 
 
-// =========================================================================
-// 2. ADMIN AUTHENTICATION (Guest Only)
-// =========================================================================
-
+// =========================================================
+// 2. ADMIN AUTHENTICATION
+// =========================================================
 Route::middleware('guest:admin')->group(function () {
     Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 });
 
-
-// =========================================================================
-// 3. ADMIN DASHBOARD & MANAGEMENT (Login Required)
-// =========================================================================
-
-Route::middleware('auth:admin')->prefix('admin')->group(function () {
-
-    // --- Dashboard & Auth ---
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-    Route::get('/dashboard', [AdminGraveController::class, 'dashboard'])->name('admin.dashboard');
-
-    // --- Module A: Grave Management ---
-    Route::get('/map-manager', [AdminGraveController::class, 'mapManager'])->name('admin.map.manager');
+// =========================================================
+// 3. ADMIN DASHBOARD & MODULES
+// =========================================================
+Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function () {
     
-    Route::get('/graves', [AdminGraveController::class, 'index'])->name('admin.graves.index');
-    Route::get('/graves/create', [AdminGraveController::class, 'create'])->name('admin.graves.create');
-    Route::post('/graves', [AdminGraveController::class, 'store'])->name('admin.graves.store');
-    Route::get('/graves/{id}/edit', [AdminGraveController::class, 'edit'])->name('admin.graves.edit');
-    Route::put('/graves/{id}', [AdminGraveController::class, 'update'])->name('admin.graves.update');
-    Route::delete('/graves/{id}', [AdminGraveController::class, 'destroy'])->name('admin.graves.destroy');
+    // Logout
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    
+    // Dashboard
+    Route::get('/dashboard', [AdminGraveController::class, 'dashboard'])->name('dashboard');
+    
+    // Map Manager (Visual Editor)
+    Route::get('/map-manager', [AdminGraveController::class, 'mapManager'])->name('map.manager');
+    
+    // Core Resource Management
+    Route::resource('graves', AdminGraveController::class);
 
-    // --- Module B: Deceased Management ---
-    Route::get('/deceased', [AdminDeceasedController::class, 'index'])->name('admin.deceased.index');
-    Route::get('/deceased/create', [AdminDeceasedController::class, 'create'])->name('admin.deceased.create');
-    Route::post('/deceased', [AdminDeceasedController::class, 'store'])->name('admin.deceased.store');
-    Route::get('/deceased/{id}/edit', [AdminDeceasedController::class, 'edit'])->name('admin.deceased.edit');
-    Route::put('/deceased/{id}', [AdminDeceasedController::class, 'update'])->name('admin.deceased.update');
-    Route::delete('/deceased/{id}', [AdminDeceasedController::class, 'destroy'])->name('admin.deceased.destroy');
+    // CRITICAL FIX: Define this route BEFORE Route::resource('deceased')
+    // This prevents "get-plots" from being treated as an {id} in the Show route.
+    Route::get('/deceased/get-plots', [AdminDeceasedController::class, 'getPlots'])->name('deceased.get-plots');
+    
+    // Now define the resource
+    Route::resource('deceased', AdminDeceasedController::class);
+    
+    // Ledger Catalog Management
+    Route::resource('ledgers', AdminLedgerController::class)->except(['show', 'edit', 'update']);
 
-    // --- Module C: Ledger & Order Management (NEW) ---
-    // Products (Batu Nisan Types)
-    Route::get('/ledgers', [AdminLedgerController::class, 'index'])->name('admin.ledgers.index');
-    Route::get('/ledgers/create', [AdminLedgerController::class, 'create'])->name('admin.ledgers.create');
-    Route::post('/ledgers', [AdminLedgerController::class, 'store'])->name('admin.ledgers.store');
-    Route::delete('/ledgers/{id}', [AdminLedgerController::class, 'destroy'])->name('admin.ledgers.destroy');
-
-    // Customer Orders
-    Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
-    Route::post('/orders/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.update');
-
+    // Order Management (View & Update Status)
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{id}', [AdminOrderController::class, 'updateStatus'])->name('orders.update');
 });

@@ -3,8 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\Request;          // <--- Add this
-use Illuminate\Support\Facades\Auth;  // <--- Add this
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,15 +13,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Add this logic to handle redirects for logged-in users
+        // Redirect Admin to Dashboard after Login
         $middleware->redirectUsersTo(function (Request $request) {
-            // If the user is logged in as an 'admin', send them to the dashboard
             if (Auth::guard('admin')->check()) {
                 return route('admin.dashboard');
             }
-            // Otherwise, send them to the public homepage (or user dashboard)
             return '/';
         });
+
+        // DISABLE CSRF FOR TOYYIBPAY CALLBACK
+        $middleware->validateCsrfTokens(except: [
+            'services/payment/callback', 
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

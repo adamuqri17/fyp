@@ -22,7 +22,7 @@
             <ul class="navbar-nav ms-auto">
                 
                 {{-- =========================================================
-                     1. ADMIN NAVBAR (Strictly the 4 items you requested)
+                     1. ADMIN NAVBAR
                      ========================================================= --}}
                 @auth('admin')
                     
@@ -30,8 +30,10 @@
                         <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">Home</a>
                     </li>
 
+                    {{-- REMOVED: Grave Plotting Navigation (Moved to Map Button) --}}
+
                     <li class="nav-item">
-                        <a class="nav-link {{ Request::routeIs('admin.map.manager') ? 'active' : '' }}" href="{{ route('admin.map.manager') }}">Map</a>
+                        <a class="nav-link {{ Request::routeIs('admin.map.manager') ? 'active' : '' }}" href="{{ route('admin.map.manager') }}">Map Overview</a>
                     </li>
                     
                     <li class="nav-item">
@@ -43,7 +45,7 @@
                             Ledger Management
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="ledgerDropdown">
-                            <li><a class="dropdown-item" href="{{ route('admin.ledgers.index') }}">Products (Batu Nisan)</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.ledgers.index') }}">Products</a></li>
                             <li><a class="dropdown-item" href="{{ route('admin.orders.index') }}">Customer Orders</a></li>
                         </ul>
                     </li>
@@ -63,10 +65,10 @@
                      2. PUBLIC NAVBAR (Guest Only)
                      ========================================================= --}}
                 @else
-                    <li class="nav-item"><a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link {{ Request::is('map') ? 'active' : '' }}" href="/map">Map Visualization</a></li>
+                    <li class="nav-item"><a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Halaman Utama</a></li>
+                    <li class="nav-item"><a class="nav-link {{ Request::is('map') ? 'active' : '' }}" href="/map">Peta Kubur</a></li>
                     <li class="nav-item"><a class="nav-link {{ Request::routeIs('public.services.index') ? 'active' : '' }}" href="{{ route('public.services.index') }}">Tempahan Batu Nisan</a></li>
-                    <li class="nav-item"><a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Hubungi Kami</a></li>
                 @endauth
 
             </ul>
@@ -85,19 +87,18 @@
                 <h5 class="text-white fw-bold mb-3"><i class="fas fa-moon me-2 text-success"></i> TPIRS</h5>
                 <p class="mb-4">
                     Sistem Pengurusan Tanah Perkuburan Islam Raudhatul Sa’adah. 
-                    Dedicated to managing burial plots efficiently with modern geospatial technology.
                 </p>
             </div>
             <div class="col-lg-3 col-md-6">
                 <h6 class="footer-title">Quick Navigation</h6>
                 <ul class="list-unstyled">
-                    <li><a href="/" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Plot Search</a></li>
-                    <li><a href="/map" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Digital Map</a></li>
-                    <li><a href="{{ route('public.services.index') }}" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Batu Nisan Services</a></li>
+                    <li><a href="/" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Carian Plot Kubur</a></li>
+                    <li><a href="/map" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Peta Kubur</a></li>
+                    <li><a href="{{ route('public.services.index') }}" class="footer-link"><i class="fas fa-angle-right me-2 text-success"></i>Tempahan Batu Nisan</a></li>
                 </ul>
             </div>
             <div class="col-lg-4 col-md-6">
-                <h6 class="footer-title">Contact Us</h6>
+                <h6 class="footer-title">Hubungi Kami</h6>
                 <ul class="list-unstyled">
                     <li class="mb-3 d-flex">
                         <i class="fas fa-map-marker-alt text-success mt-1 me-3"></i>

@@ -59,7 +59,11 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label text-muted small fw-bold">PASSWORD</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label text-muted small fw-bold mb-0">PASSWORD</label>
+                        
+                    </div>
+                    
                     <div class="login-input-group">
                         <span class="login-input-icon">
                             <i class="fas fa-lock"></i>
@@ -67,6 +71,7 @@
                         <input type="password" name="password" class="login-form-control login-input-field" 
                                placeholder="Enter your password" required>
                     </div>
+                    <a class="text-decoration-none small text-success fw-bold">Forgot Password?</a>
                 </div>
 
                 <div class="d-grid pt-2">

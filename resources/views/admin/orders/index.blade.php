@@ -36,9 +36,7 @@
                             <div class="input-group input-group-sm">
                                 <select name="status" class="form-select">
                                     <option value="Pending">Pending</option>
-                                    <option value="Paid">Paid</option>
                                     <option value="Installed">Installed</option>
-                                    <option value="Cancelled">Cancelled</option>
                                 </select>
                                 <button class="btn btn-outline-primary">Update</button>
                             </div>

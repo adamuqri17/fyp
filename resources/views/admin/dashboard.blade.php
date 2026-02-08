@@ -18,6 +18,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-4 border-success h-100">
                 <div class="card-body">
@@ -26,6 +27,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
                 <div class="card-body">
@@ -34,11 +36,12 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-4 border-warning h-100">
+            <div class="card shadow-sm border-0 border-start border-4 border-info h-100">
                 <div class="card-body">
-                    <h6 class="text-uppercase text-muted small fw-bold">Reserved</h6>
-                    <h2 class="display-4 fw-bold text-warning mb-0">{{ $reserved }}</h2>
+                    <h6 class="text-uppercase text-muted small fw-bold">Total Orders</h6>
+                    <h2 class="display-4 fw-bold text-info mb-0">{{ $ledgerOrders }}</h2>
                 </div>
             </div>
         </div>
