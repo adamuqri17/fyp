@@ -169,26 +169,27 @@ class PublicLedgerController extends Controller
     public function searchDeceased(Request $request)
     {
         $query = $request->get('query');
-        if (strlen($query) < 1) return response()->json([]);
+        if(strlen($query) < 1) return response()->json([]);
 
-        $q = Deceased::whereHas('grave', function ($g) {
+        // Exclude graves that already have a Pending (Paid) or Installed order
+        $occupiedGraveIds = LedgerOrder::whereIn('status', ['Pending', 'Installed'])
+                                       ->pluck('grave_id')
+                                       ->toArray();
+
+        $q = Deceased::whereHas('grave', function($g) use ($occupiedGraveIds) {
             $g->where('status', 'occupied')
-              ->whereNull('ledger_id');
+              ->whereNotIn('grave_id', $occupiedGraveIds);
         });
 
         if (is_numeric($query)) {
-            $q->where(function ($sub) use ($query) {
-                $sub->where('grave_id', $query)
-                    ->orWhere('full_name', 'like', "%{$query}%");
+            $q->where(function($sub) use ($query) {
+                $sub->where('grave_id', $query)->orWhere('full_name', 'like', "%{$query}%");
             });
         } else {
             $q->where('full_name', 'like', "%{$query}%");
         }
 
-        return response()->json(
-            $q->with('grave:grave_id,section_id')
-              ->limit(5)
-              ->get(['deceased_id', 'full_name', 'grave_id', 'date_of_death'])
-        );
+        $results = $q->with('grave:grave_id,section_id')->limit(5)->get(['deceased_id', 'full_name', 'grave_id', 'date_of_death']);
+        return response()->json($results);
     }
 }
