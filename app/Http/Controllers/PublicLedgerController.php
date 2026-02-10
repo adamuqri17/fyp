@@ -100,17 +100,6 @@ class PublicLedgerController extends Controller
         $billCode = $request->billcode;
         $data = Cache::get('temp_order_' . $billCode);
 
-        if (!$data) {
-            $existing = LedgerOrder::where('bill_code', $billCode)->first();
-            if ($existing) {
-                return redirect()->route('public.services.success')
-                    ->with(['order_id' => $existing->order_id, 'amount' => $existing->amount]);
-            }
-
-            return redirect()->route('public.services.index')
-                ->with('error', 'Session expired. Please contact admin.');
-        }
-
         $order = LedgerOrder::firstOrCreate(
             ['bill_code' => $billCode],
             [
@@ -142,8 +131,6 @@ class PublicLedgerController extends Controller
 
         $billCode = $request->billcode;
         $data = Cache::get('temp_order_' . $billCode);
-
-        if (!$data) return;
 
         LedgerOrder::firstOrCreate(
             ['bill_code' => $billCode],
