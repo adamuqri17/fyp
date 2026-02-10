@@ -14,7 +14,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-mosque me-2"></i>TPIRS</a>
+        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-mosque me-2"></i>MaqamFinder</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -29,8 +29,6 @@
                     <li class="nav-item">
                         <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">Home</a>
                     </li>
-
-                    {{-- REMOVED: Grave Plotting Navigation (Moved to Map Button) --}}
 
                     <li class="nav-item">
                         <a class="nav-link {{ Request::routeIs('admin.map.manager') ? 'active' : '' }}" href="{{ route('admin.map.manager') }}">Map Overview</a>
@@ -84,7 +82,7 @@
     <div class="container">
         <div class="row gy-4">
             <div class="col-lg-5 col-md-6">
-                <h5 class="text-white fw-bold mb-3"><i class="fas fa-moon me-2 text-success"></i> TPIRS</h5>
+                <h5 class="text-white fw-bold mb-3"><i class="fas fa-moon me-2 text-success"></i> MaqamFinder</h5>
                 <p class="mb-4">
                     Sistem Pengurusan Tanah Perkuburan Islam Raudhatul Sa’adah. 
                 </p>
@@ -106,7 +104,7 @@
                     </li>
                     <li class="mb-3 d-flex">
                         <i class="fas fa-phone text-success mt-1 me-3"></i>
-                        <span>+60 3-3323 1234</span>
+                        <span>+6011-1038 4088</span>
                     </li>
                 </ul>
             </div>
