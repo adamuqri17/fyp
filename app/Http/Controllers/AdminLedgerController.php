@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ledger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // Import Storage facade
+use Illuminate\Support\Facades\Storage; 
 
 class AdminLedgerController extends Controller
 {
@@ -26,15 +26,12 @@ class AdminLedgerController extends Controller
             'material' => 'required',
             'price' => 'required|numeric',
             'description' => 'nullable',
-            'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate Image
+            'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Default placeholder if no image uploaded
         $imagePath = 'images/placeholder.jpg'; 
 
-        // Handle File Upload
         if ($request->hasFile('picture')) {
-            // Stores in 'storage/app/public/ledgers' and returns the path
             $imagePath = $request->file('picture')->store('ledgers', 'public');
         }
 
@@ -43,17 +40,59 @@ class AdminLedgerController extends Controller
             'material' => $request->material,
             'price' => $request->price,
             'description' => $request->description,
-            'picture' => $imagePath // Save the path, not the file itself
+            'picture' => $imagePath 
         ]);
 
         return redirect()->route('admin.ledgers.index')->with('success', 'New Ledger Product Added!');
+    }
+
+    // 4. SHOW EDIT FORM
+    public function edit($id)
+    {
+        $ledger = Ledger::findOrFail($id);
+        return view('admin.ledgers.edit', compact('ledger'));
+    }
+
+    // 5. UPDATE DATABASE
+    public function update(Request $request, $id)
+    {
+        $ledger = Ledger::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required',
+            'material' => 'required',
+            'price' => 'required|numeric',
+            'description' => 'nullable',
+            'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'material' => $request->material,
+            'price' => $request->price,
+            'description' => $request->description,
+        ];
+
+        // Handle Image Update
+        if ($request->hasFile('picture')) {
+            // Delete old image if it exists and isn't the placeholder
+            if ($ledger->picture && $ledger->picture !== 'images/placeholder.jpg') {
+                Storage::disk('public')->delete($ledger->picture);
+            }
+
+            // Store new image
+            $data['picture'] = $request->file('picture')->store('ledgers', 'public');
+        }
+
+        $ledger->update($data);
+
+        return redirect()->route('admin.ledgers.index')->with('success', 'Product updated successfully!');
     }
 
     public function destroy($id)
     {
         $ledger = Ledger::findOrFail($id);
         
-        // Optional: Delete the image file when deleting the record
         if ($ledger->picture && $ledger->picture !== 'images/placeholder.jpg') {
             Storage::disk('public')->delete($ledger->picture);
         }
