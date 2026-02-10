@@ -8,9 +8,8 @@ use App\Models\LedgerOrder;
 use App\Models\Deceased;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log; // Import Log facade
+use Illuminate\Support\Facades\Cache; // Import Cache
+use Illuminate\Support\Str; // Import Str
 
 class PublicLedgerController extends Controller
 {
@@ -26,7 +25,7 @@ class PublicLedgerController extends Controller
         return view('public.services.order', compact('ledger'));
     }
 
-    // 1. CREATE BILL & REDIRECT
+    // 1. CREATE BILL & REDIRECT (DO NOT SAVE TO DB YET)
     public function store(Request $request)
     {
         $request->validate([
@@ -43,21 +42,21 @@ class PublicLedgerController extends Controller
 
         // B. Check Existing Paid Orders
         $hasLedger = LedgerOrder::where('grave_id', $request->grave_id)
-                                ->whereIn('status', ['Pending', 'Installed'])
+                                ->whereIn('status', ['Pending', 'Installed']) // Pending now means "Paid & Waiting Install"
                                 ->exists();
 
         if ($hasLedger) {
             return back()->withErrors(['grave_id' => 'This grave already has a confirmed order.'])->withInput();
         }
 
+        // C. Generate Temporary Reference (Since we don't have an Order ID yet)
         $tempRef = 'TEMP-' . Str::random(10);
         $amountCents = $request->amount * 100;
 
-        // C. Call ToyyibPay using CONFIG (Safe for Production)
-        // We use config() instead of env() to support 'php artisan config:cache'
+        // D. Call ToyyibPay
         $billData = [
-            'userSecretKey' => config('services.toyyibpay.secret'),
-            'categoryCode' => config('services.toyyibpay.category'),
+            'userSecretKey' => env('TOYYIBPAY_SECRET'),
+            'categoryCode' => env('TOYYIBPAY_CATEGORY'),
             'billName' => 'Headstone Order',
             'billDescription' => 'Grave ID: ' . $request->grave_id,
             'billPriceSetting' => 1,
@@ -75,63 +74,45 @@ class PublicLedgerController extends Controller
             'billChargeToCustomer' => 1,
         ];
 
-        try {
-            // Get URL from config
-            $url = config('services.toyyibpay.url');
-            
-            // Safety check for missing config
-            if(empty($url)) {
-                 Log::error('ToyyibPay URL is missing in config/services.php.');
-                 return back()->with('error', 'System Configuration Error: Payment Gateway URL missing.');
-            }
+        $response = Http::asForm()->post(env('TOYYIBPAY_URL') . '/index.php/api/createBill', $billData);
+        $billCode = $response->json()[0]['BillCode'] ?? null;
 
-            $response = Http::asForm()->post($url . '/index.php/api/createBill', $billData);
-            
-            // Log failure for debugging
-            if ($response->failed()) {
-                Log::error('ToyyibPay API Error: ' . $response->body());
-                return back()->with('error', 'Payment gateway connection failed. Please try again.');
-            }
+        if ($billCode) {
+            // E. STORE DATA IN CACHE (Expires in 2 hours)
+            // We use the BillCode as the key to retrieve this data later
+            $orderData = [
+                'grave_id' => $request->grave_id,
+                'ledger_id' => $request->ledger_id,
+                'buyer_name' => $request->buyer_name,
+                'buyer_phone' => $request->buyer_phone,
+                'amount' => $request->amount,
+                'bill_code' => $billCode,
+            ];
 
-            $responseData = $response->json();
-            $billCode = $responseData[0]['BillCode'] ?? null;
+            Cache::put('temp_order_' . $billCode, $orderData, 7200); // 7200 seconds = 2 hours
 
-            if ($billCode) {
-                // D. STORE DATA IN CACHE (Expires in 2 hours)
-                $orderData = [
-                    'grave_id' => $request->grave_id,
-                    'ledger_id' => $request->ledger_id,
-                    'buyer_name' => $request->buyer_name,
-                    'buyer_phone' => $request->buyer_phone,
-                    'amount' => $request->amount,
-                    'bill_code' => $billCode,
-                ];
-
-                Cache::put('temp_order_' . $billCode, $orderData, 7200);
-
-                return redirect($url . '/' . $billCode);
-            } else {
-                Log::error('ToyyibPay Response Invalid: ' . $response->body());
-                return back()->with('error', 'Payment gateway error. Please try again.');
-            }
-        } catch (\Exception $e) {
-            Log::error('ToyyibPay Exception: ' . $e->getMessage());
-            return back()->with('error', 'System error occurred. Please contact admin.');
+            // Redirect to Payment
+            return redirect(env('TOYYIBPAY_URL') . '/' . $billCode);
+        } else {
+            return back()->with('error', 'Payment gateway error. Please try again.');
         }
     }
 
     // 2. HANDLE RETURN (User redirected back)
     public function paymentReturn(Request $request)
     {
-        $statusId = $request->status_id; 
+        $statusId = $request->status_id; // 1=Success
         $billCode = $request->billcode;
 
         if ($statusId == 1) {
+            // A. Retrieve Data from Cache
             $data = Cache::get('temp_order_' . $billCode);
 
             if ($data) {
+                // B. Create Order in DB (Only now!)
+                // Use updateOrCreate to prevent duplicates if user refreshes page
                 $order = LedgerOrder::firstOrCreate(
-                    ['bill_code' => $billCode],
+                    ['bill_code' => $billCode], // Check unique bill code
                     [
                         'grave_id' => $data['grave_id'],
                         'ledger_id' => $data['ledger_id'],
@@ -139,21 +120,26 @@ class PublicLedgerController extends Controller
                         'buyer_phone' => $data['buyer_phone'],
                         'amount' => $data['amount'],
                         'transaction_date' => now(),
-                        'status' => 'Pending'
+                        'status' => 'Pending' // Pending = Installation Pending
                     ]
                 );
+
+                // C. Clear Cache
                 Cache::forget('temp_order_' . $billCode);
+
                 return redirect()->route('public.services.success')->with(['order_id' => $order->order_id, 'amount' => $order->amount]);
             } else {
-                // Check if already created (e.g. via callback)
+                // Edge case: Data expired or already processed
+                // Check if order exists in DB anyway
                 $existingOrder = LedgerOrder::where('bill_code', $billCode)->first();
                 if ($existingOrder) {
                     return redirect()->route('public.services.success')->with(['order_id' => $existingOrder->order_id, 'amount' => $existingOrder->amount]);
                 }
+                
                 return redirect()->route('public.services.index')->with('error', 'Session expired. Please contact admin if payment was deducted.');
             }
         } else {
-            return redirect()->route('public.services.index')->with('error', 'Payment failed or cancelled.');
+            return redirect()->route('public.services.index')->with('error', 'Payment failed or cancelled. No order was created.');
         }
     }
 
@@ -161,9 +147,10 @@ class PublicLedgerController extends Controller
     public function paymentCallback(Request $request)
     {
         $billCode = $request->billcode;
-        $status = $request->status; 
+        $status = $request->status; // 1=Success
 
         if ($status == 1) {
+            // Retrieve Data from Cache
             $data = Cache::get('temp_order_' . $billCode);
 
             if ($data) {
@@ -190,6 +177,7 @@ class PublicLedgerController extends Controller
         $query = $request->get('query');
         if(strlen($query) < 1) return response()->json([]);
 
+        // Exclude graves that already have a Pending (Paid) or Installed order
         $occupiedGraveIds = LedgerOrder::whereIn('status', ['Pending', 'Installed'])
                                        ->pluck('grave_id')
                                        ->toArray();
