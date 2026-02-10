@@ -10,7 +10,7 @@ class Grave extends Model
     use HasFactory;
 
     protected $primaryKey = 'grave_id';
-    protected $fillable = ['admin_id', 'section_id', 'latitude', 'longitude', 'status'];
+    protected $fillable = ['admin_id', 'section_id', 'latitude', 'longitude', 'status', 'ledger_id'];
 
     public function admin()
     {
